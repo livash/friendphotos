@@ -1,0 +1,3 @@
+<script type="application/json" id="photos-json">
+  <%= @photos.to_json(:include => :tags).html_safe %>
+</script>
