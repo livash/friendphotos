@@ -9,8 +9,20 @@
 //
 // WARNING: THE FIRST BLANK LINE MARKS THE END OF WHAT'S TO BE PROCESSED, ANY BLANK LINE SHOULD
 // GO AFTER THE REQUIRES BELOW.
-App = {};
-
+//= require global
 //= require jquery
 //= require jquery_ujs
+//= require underscore
+//= require jquery.colorbox-min
 //= require_tree .
+
+$(function() {
+  App.Model.Photo.fetch(function(photos) {
+    var indexView = new App.Views.Photos(photos);
+    $("#main-div").html(indexView.render());
+  });
+
+  App.Model.User.fetch(function(user) {
+    console.log("fetched user friends: " + user.friends);
+  });
+});

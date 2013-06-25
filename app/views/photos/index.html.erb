@@ -1,3 +1,32 @@
+<div id="main-div">
+</div>
+
 <script type="application/json" id="photos-json">
   <%= @photos.to_json(:include => :tags).html_safe %>
+</script>
+
+<script type="text/template" id="photos-index-temp">
+<ul>
+<%% _(photos).each(function(photo, idx) { %>
+  <li>
+    <%%= photo.id %>  <%%= photo.title %> <img src="<%%= photo.url %>" class="thumbnail cboxElement" data-id=<%%= photo.id %>>
+  </li>
+<%% }); %>
+</ul>
+
+<form id="new-photo-form">
+  <label for="photo_title">photo_title</label>
+  <input type="text" name="photo[title]" id="photo_title">
+  <br>
+  <label for="photo_url">photo_url</label>
+  <input type="text" name="photo[url]" id="photo_url">
+  <input type="submit" value="Add photo">
+</form>
+</script>
+
+
+<script type="text/template" id="photo-view-temp">
+<a href="#">back to index</a>
+<br/>
+  <img src="<%%= photo.url %>" class="photo center-div" data-id=<%%= photo.id %>>
 </script>
