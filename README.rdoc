@@ -1,261 +1,190 @@
-== Welcome to Rails
+# Photo Tagger
 
-Rails is a web-application framework that includes everything needed to create
-database-backed web applications according to the Model-View-Control pattern.
+Today, you'll be building a full-stack application that will enable a
+user to add a photo and tag the user's friends in that photo. You'll be
+dealing with multiple users, multiple photos, and multiple tags at once.
 
-This pattern splits the view (also called the presentation) into "dumb"
-templates that are primarily responsible for inserting pre-built data in between
-HTML tags. The model contains the "smart" domain objects (such as Account,
-Product, Person, Post) that holds all the business logic and knows how to
-persist themselves to a database. The controller handles the incoming requests
-(such as Save New Account, Update Product, Show Post) by manipulating the model
-and directing data to the view.
+Read through the whole project first to get a sense of what you'll be
+building and how everything ties together.
 
-In Rails, the model is handled by what's called an object-relational mapping
-layer entitled Active Record. This layer allows you to present the data from
-database rows as objects and embellish these data objects with business logic
-methods. You can read more about Active Record in
-link:files/vendor/rails/activerecord/README.html.
+## Functionality Overview
 
-The controller and view are handled by the Action Pack, which handles both
-layers by its two parts: Action View and Action Controller. These two layers
-are bundled in a single package due to their heavy interdependence. This is
-unlike the relationship between the Active Record and Action Pack that is much
-more separate. Each of these packages can be used independently outside of
-Rails. You can read more about Action Pack in
-link:files/vendor/rails/actionpack/README.html.
+### Photos Index Page
 
+A user will login. Upon login, they will be redirected to the photo
+index page where they will see all the photos they have previously
+added. On the index page, there should be a form to add a new photo. It
+should simply take a URL to that photo. When the user clicks on a photo
+it should take them to the photo show page.
 
-== Getting Started
+Everything but login should be AJAX. No page refreshes. (And if you're
+feeling pretty good, go ahead and make login AJAX as well - and make
+sure it works).
 
-1. At the command prompt, create a new Rails application:
-       <tt>rails new myapp</tt> (where <tt>myapp</tt> is the application name)
+### Photo Show Page (i.e. tagging page)
 
-2. Change directory to <tt>myapp</tt> and start the web server:
-       <tt>cd myapp; rails server</tt> (run with --help for options)
+When a user is at a photos show page, the photo should be enlarged and
+centered on the page. The user should be able to click anywhere on the
+photo and see a dropdown of the user's friends. Upon clicking one of the
+names, the tag should be saved and rendered onto the page.
 
-3. Go to http://localhost:3000/ and you'll see:
-       "Welcome aboard: You're riding Ruby on Rails!"
+## Phase I: Rails API
 
-4. Follow the guidelines to start developing your application. You can find
-the following resources handy:
+You may want to first get login functionality setup, then proceed with
+the rest.
 
-* The Getting Started Guide: http://guides.rubyonrails.org/getting_started.html
-* Ruby on Rails Tutorial Book: http://www.railstutorial.org/
+### Models
 
+Start by building the requisite models with relevant associations and
+validations.
 
-== Debugging Rails
+Users have friends and photos, tags belong to photos and are always of a
+friend, photos have tags. Let it flow through your fingers into code.
 
-Sometimes your application goes wrong. Fortunately there are a lot of tools that
-will help you debug it and get it back on the rails.
+### API Layer
 
-First area to check is the application log files. Have "tail -f" commands
-running on the server.log and development.log. Rails will automatically display
-debugging and runtime information to these files. Debugging info will also be
-shown in the browser on requests from 127.0.0.1.
+When thinking about the API layer, don't start with the controllers.
+Start with your routes. Think about all the data needs of your
+application and which routes will serve which needs. Think about
+sensible nesting. In the next phase, your JavaScript models will be
+interacting with these routes - those models are the consumers of the
+routes your write.
 
-You can also log your own messages directly into the log file from your code
-using the Ruby logger class from inside your controllers. Example:
+Then write your controllers to respond with JSON. Make it so that the
+only route that responds to both HTML and JSON is your photos index
+route.
 
-  class WeblogController < ActionController::Base
-    def destroy
-      @weblog = Weblog.find(params[:id])
-      @weblog.destroy
-      logger.info("#{Time.now} Destroyed Weblog ID ##{@weblog.id}!")
-    end
-  end
+## Phase II: JavaScript Models
 
-The result will be a message in your log file along the lines of:
+*NB: All of your JavaScript code today should go in the
+`app/assets/javascripts` folder. For this section, create a folder
+called `models` and put your JavaScript models in there, one per file.
+Don't forget that you're only allowed one global variable. Choose
+wisely.*
 
-  Mon Oct 08 14:22:29 +1000 2007 Destroyed Weblog ID #1!
+Just for today, don't bootstrap any data. We're going to focus on the
+data communication layer for this phase. The first step in JavaScript
+code organization will be to abstract out the data layer into JavaScript
+models. Once you have this setup, the rest of your JavaScript
+application should never deal with raw data (JSON objects) or make AJAX
+requests to the server - it will only interact with your models.
 
-More information on how to use the logger is at http://www.ruby-doc.org/core/
+### Model Responsibilities:
 
-Also, Ruby documentation can be found at http://www.ruby-lang.org/. There are
-several books available online as well:
+  * Communicate with Rails API
+  * Encapsulate data
+  * Encapsulate methods related to data
 
-* Programming Ruby: http://www.ruby-doc.org/docs/ProgrammingRuby/ (Pickaxe)
-* Learn to Program: http://pine.fm/LearnToProgram/ (a beginners guide)
+### Your Models
 
-These two books will bring you up to speed on the Ruby language and also on
-programming in general.
+You should have the following models:
 
+  * User
+  * Photo
+  * Tag
 
-== Debugger
+Each of your models should have the following properties:
 
-Debugger support is available through the debugger command when you start your
-Mongrel or WEBrick server with --debugger. This means that you can break out of
-execution at any point in the code, investigate and change the model, and then,
-resume execution! You need to install ruby-debug to run the server in debugging
-mode. With gems, use <tt>sudo gem install ruby-debug</tt>. Example:
+  * Constructor that can take a JavaScript object with its attributes
+    (i.e. mass assignment)
+  * CRUD AJAX methods: your AJAX methods should communicate with the server,
+    get the necessary data, and process that data by setting the
+    properties of the model.
 
-  class WeblogController < ActionController::Base
-    def index
-      @posts = Post.all
-      debugger
-    end
-  end
+      * `save`: Should persist the model to the Rails API appropriately
+        (i.e. make the right AJAX request). `save` should not do
+        anything other than delegate to `update` or `create` depending
+        on whether it's a new record or not.
+      * `fetch`: Should get a single record's data and update its own
+        properties with whatever came back from the server.
+      * `destroy`: Should destroy the record on the server
 
-So the controller will accept the action, run the first line, then present you
-with a IRB prompt in the server window. Here you can do things like:
+  * Callbacks in AJAX methods: all of your AJAX methods should
+    optionally take a callback, which should be called when the AJAX
+    response comes back (make sure to hand the callback something
+    sensible, like the model object that includes the data that came
+    back in the response.
+  * `baseUrl`: A property that encodes the base URL for AJAX requests
+    (e.g. `/photos`). Your AJAX methods should use this to construct the
+    proper URL to make requests to.
+  * Class properties (i.e. properties not on the prototype but on the
+    constructor itself):
 
-  >> @posts.inspect
-  => "[#<Post:0x14a6be8
-          @attributes={"title"=>nil, "body"=>nil, "id"=>"1"}>,
-       #<Post:0x14a6620
-          @attributes={"title"=>"Rails", "body"=>"Only ten..", "id"=>"2"}>]"
-  >> @posts.first.title = "hello from a debugger"
-  => "hello from a debugger"
+      * `all`: Should be an array of model objects. Make sure to keep
+        this updated.
+      * `fetch`: Should fetch all records from the server and reset `all`
+      * `find`: Should search through `all` for a model object with the
+        given id
 
-...and even better, you can examine how your runtime objects actually work:
+At the end of this phase, you should have all your data abstracted out
+into JavaScript classes that can communicate with the server.
 
-  >> f = @posts.first
-  => #<Post:0x13630c4 @attributes={"title"=>nil, "body"=>nil, "id"=>"1"}>
-  >> f.
-  Display all 152 possibilities? (y or n)
+## Phase III: View Controllers (+ templates)
 
-Finally, when you're ready to resume execution, you can enter "cont".
+Next, you'll create controller objects. We'll call them
+`ViewControllers` since we'll have one per "view." Create a
+`PhotosViewController` and a `TaggingViewController`.
 
+*NB: In keeping with our code organization focus, you'll put these
+controllers in the `javascripts/` directory in a subfolder called
+`controllers/`.*
 
-== Console
+Each should take in their constructor a JQuery object that is the
+element they should render into. Each should also have a `render`
+method. The `TaggingViewController` should also take a photo in its
+constructor.
 
-The console is a Ruby shell, which allows you to interact with your
-application's domain model. Here you'll have all parts of the application
-configured, just like it is when the application is running. You can inspect
-domain models, change values, and save to the database. Starting the script
-without arguments will launch it in the development environment.
+All of your listeners and event handlers should be written in these
+controllers. Try to keep each method small, so use named callbacks when
+appropriate (i.e. not anonymous functions).
 
-To start the console, run <tt>rails console</tt> from the application
-directory.
+### Templates
 
-Options:
+For templates you will need the `ejs` gem. All of your templates should go in
+a `templates/` folder under `javascripts/` and end in `.jst.ejs`. Accessing them
+in your JavaScript code can be done through the `JST` global variable.
 
-* Passing the <tt>-s, --sandbox</tt> argument will rollback any modifications
-  made to the database.
-* Passing an environment name as an argument will load the corresponding
-  environment. Example: <tt>rails console production</tt>.
+For example:
 
-To reload your controllers and models after launching the console run
-<tt>reload!</tt>
+`app/assets/javascripts/templates/fancy.jst.ejs`:
 
-More information about irb can be found at:
-link:http://www.rubycentral.org/pickaxe/irb.html
+```
+Hi <%= name %>
+```
 
+`app/assets/javascripts/controllers/dummyController.js`:
 
-== dbconsole
+```
+templateFunction = JST['fancy'];
+renderedTemplate = templateFunction({name: 'World'});
+console.log(renderedTemplate);
 
-You can go to the command line of your database directly through <tt>rails
-dbconsole</tt>. You would be connected to the database with the credentials
-defined in database.yml. Starting the script without arguments will connect you
-to the development database. Passing an argument will connect you to a different
-database, like <tt>rails dbconsole production</tt>. Currently works for MySQL,
-PostgreSQL and SQLite 3.
+// => "Hi World"
+```
 
-== Description of Contents
+Note that the `script` tags are unnecessary when you're writing your
+templates in a `.jst.ejs` file.
 
-The default directory structure of a generated Ruby on Rails application:
+## Tagging Functionality
 
-  |-- app
-  |   |-- assets
-  |   |   |-- images
-  |   |   |-- javascripts
-  |   |   `-- stylesheets
-  |   |-- controllers
-  |   |-- helpers
-  |   |-- mailers
-  |   |-- models
-  |   `-- views
-  |       `-- layouts
-  |-- config
-  |   |-- environments
-  |   |-- initializers
-  |   `-- locales
-  |-- db
-  |-- doc
-  |-- lib
-  |   |-- assets
-  |   `-- tasks
-  |-- log
-  |-- public
-  |-- script
-  |-- test
-  |   |-- fixtures
-  |   |-- functional
-  |   |-- integration
-  |   |-- performance
-  |   `-- unit
-  |-- tmp
-  |   `-- cache
-  |       `-- assets
-  `-- vendor
-      |-- assets
-      |   |-- javascripts
-      |   `-- stylesheets
-      `-- plugins
+There are two parts to the tagging functionality.
 
-app
-  Holds all the code that's specific to this particular application.
+First, there is the creation of the tag. The user should be able to
+click on the photo and see a dropdown of all of his friends. Upon
+clicking one of those names, the tag should be created.
 
-app/assets
-  Contains subdirectories for images, stylesheets, and JavaScript files.
+Second, there is the rendering of the tag. For this, you'll likely want
+to store an `x-coord` and a `y-coord` in *percentage* form. Pixels
+wouldn't be very helpful since the photo might be different sizes on
+different screens.
 
-app/controllers
-  Holds controllers that should be named like weblogs_controller.rb for
-  automated URL mapping. All controllers should descend from
-  ApplicationController which itself descends from ActionController::Base.
+Check out the jQuery docs. You'll find that you can get the current
+position of the mouse cursor in x & y, which you'll have to compare
+against the position and dimensions of the photo to get your percentage
+coordinates.
 
-app/models
-  Holds models that should be named like post.rb. Models descend from
-  ActiveRecord::Base by default.
+## Flesh it out
 
-app/views
-  Holds the template files for the view that should be named like
-  weblogs/index.html.erb for the WeblogsController#index action. All views use
-  eRuby syntax by default.
+Now that you have your basic models, view controllers, and templates
+setup, go ahead and implement all the app functionality.
 
-app/views/layouts
-  Holds the template files for layouts to be used with views. This models the
-  common header/footer method of wrapping views. In your views, define a layout
-  using the <tt>layout :default</tt> and create a file named default.html.erb.
-  Inside default.html.erb, call <% yield %> to render the view using this
-  layout.
-
-app/helpers
-  Holds view helpers that should be named like weblogs_helper.rb. These are
-  generated for you automatically when using generators for controllers.
-  Helpers can be used to wrap functionality for your views into methods.
-
-config
-  Configuration files for the Rails environment, the routing map, the database,
-  and other dependencies.
-
-db
-  Contains the database schema in schema.rb. db/migrate contains all the
-  sequence of Migrations for your schema.
-
-doc
-  This directory is where your application documentation will be stored when
-  generated using <tt>rake doc:app</tt>
-
-lib
-  Application specific libraries. Basically, any kind of custom code that
-  doesn't belong under controllers, models, or helpers. This directory is in
-  the load path.
-
-public
-  The directory available for the web server. Also contains the dispatchers and the
-  default HTML files. This should be set as the DOCUMENT_ROOT of your web
-  server.
-
-script
-  Helper scripts for automation and generation.
-
-test
-  Unit and functional tests along with fixtures. When using the rails generate
-  command, template test files will be generated for you and placed in this
-  directory.
-
-vendor
-  External libraries that the application depends on. Also includes the plugins
-  subdirectory. If the app has frozen rails, those gems also go here, under
-  vendor/rails/. This directory is in the load path.

@@ -29,6 +29,5 @@ App.Model.User.fetchFriends = function (callback) {
       callback(friends);
     }
   });
-
 }
 
