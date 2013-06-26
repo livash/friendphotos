@@ -1,1 +1,5 @@
-var App = {};
+var App = {
+  Model : {},
+  Views : {},
+  Store : {}
+};

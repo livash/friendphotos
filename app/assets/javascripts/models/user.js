@@ -1,6 +1,9 @@
 App.Model.User = function (params) {
   this.name = params.username;
-  this.friends = App.Model.User.fetchFriends();
+  var that = this;
+  App.Model.User.fetchFriends(function (friends) {
+    that.friends = friends;
+  });
 };
 
 App.Model.User.fetch = function(callback) {
@@ -14,17 +17,18 @@ App.Model.User.fetch = function(callback) {
   });
 };
 
-App.Model.User.fetchFriends = function () {
-  var friends;
+App.Model.User.fetchFriends = function (callback) {
   $.ajax({
     url: "/friends",
     type: "get",
     success: function (friendsParams) {
-      friends = _(friendsParams).map(function (friend) {
+      var friends = _(friendsParams).map(function (friend) {
         return { id: friend.id, name: friend.username };
       });
+
+      callback(friends);
     }
   });
-  return friends;
+
 }
 

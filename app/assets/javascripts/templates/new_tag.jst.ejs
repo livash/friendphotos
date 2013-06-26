@@ -1,0 +1,10 @@
+<div class='tag'  style="left: <%= e.clientX + 'px'%>;
+      top: <%= e.clientY + 'px'%>">
+<select>
+  <option>Select...</option>
+<% _(App.Store.current_user.friends).each(function(friend){ %>
+  <option value="<%= friend.id %>"><%= friend.name %></option>
+<% }); %>
+</select>
+<button id="add-tag">+</button>
+</div>

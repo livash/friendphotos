@@ -9,7 +9,11 @@ class User < ActiveRecord::Base
   has_many :photos,
   :foreign_key => :owner_id
 
-  #has_many :tags, :through => :photos, :source => :tags
+  has_many :friendships, :class_name => "Friend", :foreign_key => :user_id
+  has_many :friends, :through => :friendships, :source => :friend
+
+  has_many :followerships, :class_name => "Friend", :foreign_key => :friend_id
+  has_many :followers, :through => :followerships, :source => :user
 
   has_many :taggings,
   :class_name => "Tag",

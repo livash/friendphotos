@@ -1,0 +1,18 @@
+<div class="all-tiles">
+<% _(photos).each(function(photo, idx) { %>
+  <div class='photo-tile'>
+    <img src="<%= photo.url %>" class="thumbnail cboxElement" data-id=<%= photo.id %>>
+    <br>
+     <%= photo.id %>  <%= photo.title %>
+  </div>
+<% }); %>
+</div>
+
+<form id="new-photo-form">
+  <label for="photo_title">photo_title</label>
+  <input type="text" name="photo[title]" id="photo_title">
+  <br>
+  <label for="photo_url">photo_url</label>
+  <input type="text" name="photo[url]" id="photo_url">
+  <input type="submit" value="Add photo">
+</form>

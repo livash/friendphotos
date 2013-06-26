@@ -13,16 +13,15 @@
 //= require jquery
 //= require jquery_ujs
 //= require underscore
+//= require_tree ./templates
 //= require jquery.colorbox-min
 //= require_tree .
 
 $(function() {
-  App.Model.Photo.fetch(function(photos) {
-    var indexView = new App.Views.Photos(photos);
-    $("#main-div").html(indexView.render());
-  });
-
   App.Model.User.fetch(function(user) {
-    console.log("fetched user friends: " + user.friends);
+    App.Model.Photo.fetch(function(photos) {
+      var indexView = new App.Views.Photos(photos);
+      $("#main-div").html(indexView.render());
+    });
   });
 });

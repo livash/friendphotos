@@ -19,5 +19,21 @@
 
 
 .photo {
+  margin-left: 15%;
   width: 70%;
+}
+
+.tag {
+  position: absolute;
+  background: #F5DA81;
+}
+
+.photo-tile {
+  float: left;
+  width: 150px;
+  height: 150px;
+}
+
+.all-tiles {
+  width: 800px;
 }
